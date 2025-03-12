@@ -1,0 +1,240 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "pi# Imports \n"
+      ],
+      "id": "92c527da"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd \n",
+        "import numpy as np \n",
+        "import vega_datasets as vd"
+      ],
+      "id": "e75011ef",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Basics of a Function \n"
+      ],
+      "id": "7956b8ce"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def pounds_to_kg(pounds): \n",
+        "    return pounds * 0.4536"
+      ],
+      "id": "f8675f12",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#pounds_to_kg(180)\n",
+        "pounds_to_kg(pounds=180)"
+      ],
+      "id": "6c53f165",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Similary...\n"
+      ],
+      "id": "e9da93d2"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def pds_to_kg(pounds): \n",
+        "    kg = pounds * 0.4536\n",
+        "    return kg"
+      ],
+      "id": "bb903140",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "pds_to_kg(160)"
+      ],
+      "id": "f6d8db86",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Using the ftn inside a dataframe: \n"
+      ],
+      "id": "d8eac337"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "pounds_df = pd.DataFrame({\"pounds\": [150, 200, 250]})\n",
+        "pounds_df"
+      ],
+      "id": "2d440f8d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "pounds_df[\"kg\"] = pounds_to_kg(pounds_df[\"pounds\"])\n",
+        "\n",
+        "pounds_df"
+      ],
+      "id": "6015cf66",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Age in Months Function\n",
+        "Create a simple function called `years_to_months` that transforms age in years to age in months.\n",
+        "\n",
+        "Use it on the `riots_df` DataFrame imported below to create a new column called `age_months`:\n"
+      ],
+      "id": "7efda807"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "riots_df = vd.data.la_riots()\n",
+        "\n",
+        "riots_df"
+      ],
+      "id": "1af0237b",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# creating the years to months ftn: \n",
+        "\n",
+        "def years_to_months (age):\n",
+        "    return age * 12"
+      ],
+      "id": "bf9ca176",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# creating a new column called 'age_months': \n",
+        "\n",
+        "riots_df[\"age_months\"] = years_to_months(riots_df[\"age\"])\n",
+        "\n",
+        "riots_df"
+      ],
+      "id": "00297ca9",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Ftns with multiple arguments \n"
+      ],
+      "id": "b30b4335"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def cal_calories(carb_grams, protein_grams, fat_grams): \n",
+        "    result = (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)\n",
+        "    return  result"
+      ],
+      "id": "d264dc1e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "cal_calories(carb_grams = 50 ,protein_grams = 25,fat_grams = 15)"
+      ],
+      "id": "6912e321",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# However gives an error when 1 argument is missing. \n",
+        "# cal_calories(carb_grams = 50 ,protein_grams = 25) "
+      ],
+      "id": "7685f472",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "# Defining default arguments.\n",
+        "\n",
+        "def cal_calories_2 (carb_grams = 0, protein_grams = 0, fat_grams = 0): \n",
+        "    result = (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)\n",
+        "    return  result"
+      ],
+      "id": "88708e26",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "cal_calories_2(carb_grams = 50 )"
+      ],
+      "id": "dc22b66e",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/olgamushakarara/Desktop/Week_4/2.graph_course_python/.venv/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

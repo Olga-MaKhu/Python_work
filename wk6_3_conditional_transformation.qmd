@@ -1,0 +1,235 @@
+
+```{python}
+import pandas as pd
+import numpy as np
+import vega_datasets as vd
+import plotly.express as px
+
+```
+
+# Introduction to replace(): 
+
+```{python}
+tips = px.data.tips()
+tips["day"].value_counts()
+```
+
+# Replace these day abbreviations with the full day names: 
+
+```{python}
+# Creating a dictionary that maps the abbreviated names to the full names: 
+day_mapping = {
+    "Sun": "Sunday", 
+    "Sat": "Saturday",
+    "Fri": "Friday",
+    "Thur": "Thursday"
+}
+
+day_mapping
+```
+
+
+```{python}
+# Use the replace() method with the dictionary: 
+tips["day_full"] = tips["day"].replace(day_mapping)
+
+tips
+```
+
+# # This can be perfomed directly within  the replace () method without defining  a dictionary: 
+
+
+```{python}
+tips['day_full'] = tips['day'].replace({
+    "Sun": "Sunday",
+    "Sat": "Saturday",
+    "Fri": "Friday",
+    "Thur": "Thursday"
+})
+tips[['day', 'day_full']].head()
+```
+
+# Practice Q1: Abbreviate Sex
+Using the tips dataset, replace the values in the sex column to abbreviate gender:
+
+Replace "Female" with "F".
+Replace "Male" with "M".
+Assign the result to a new column called sex_abbr and display the first few rows.
+
+
+```{python}
+# Create a dictionary first: 
+
+sex_mapping = {
+    "Female": "F",
+    "Male": "M"
+}
+
+sex_mapping
+```
+
+
+```{python}
+# using the replace() method 
+
+tips["sex_abbr"] = tips["sex"].replace(sex_mapping)
+
+tips.head()
+```
+
+# Handling missing values with replace()
+When I want to replace my missining values such as NaN and None with the specific value or placeholder using replace(). 
+
+```{python}
+movies = vd.data.movies()
+movies["Creative_Type"].value_counts(dropna=False)
+
+```
+
+# Since None = 446, we want to replace the None with the value "Unknown/Unclear"
+
+
+```{python}
+
+# Replacing None values with a string: 
+movies["Creative_Type"] = movies["Creative_Type"].replace({None:"Unknown/Unclear"})
+
+movies["Creative_Type"].value_counts(dropna=False)
+```
+
+
+```{python}
+# Replacing NaN values with a number:
+movies["US_DVD_Sales"].tail(10)
+
+movies["US_DVD_Sales"] = movies["US_DVD_Sales"].replace({np.nan: 0})
+
+movies["US_DVD_Sales"].tail(10)
+```
+
+# Practice Q2: Standardize MPAA Ratings
+In the `movies` dataset, the  `MPAA_Rating` column contains movie ratings.
+Some entries are `None` or `"Not Rated"`. Replace both `None` and `"Not Rated"` with
+ `"Unrated"`.
+
+Then, use `value_counts()` to see how many movies are unrated. 
+There should be 699 movies in this category. 
+
+
+```{python}
+movies["MPAA_Rating"].value_counts(dropna=False)
+
+movies["MPAA_Rating"] = movies["MPAA_Rating"].replace({None: "Unrated",
+"Not Rated": "Unrated"})
+
+movies["MPAA_Rating"].value_counts(dropna=False)
+```
+
+# Categorizing Numeric Data with Custome Functions: 
+## Revision: 
+
+If the value is less than 10 million, the category is "Low".
+If the value is between 10 million and 50 million, the category is "Medium".
+If the value is greater than 50 million, the category is "High".
+
+
+```{python}
+def categ_gross(gross): 
+    if gross < 10000000: 
+        return "Low"
+    elif gross >= 10000000 and gross <=  50000000: 
+        return "Medium"
+    elif gross > 50000000: 
+        return "High"
+    else: 
+        return None
+
+categ_gross_vec = np.vectorize(categ_gross) 
+
+categ_gross_vec([10, 15000000, 6000000000, -1])
+```
+
+
+```{python}
+movies["gross_category"] = categ_gross_vec(movies["US_Gross"])
+movies["gross_category"].value_counts(dropna=False)
+```
+
+# Complex Transformations with Custom Functions
+The flexibility of custom functions can be extended easily to more 
+complex conditional transformations.
+
+For example, suppose we want to flag superhero movies as “US action movie” 
+or “Global action movie” based on their US and worldwide gross earnings.
+
+For Super Hero movies, if the US gross and worldwide gross are the same
+(indicating sales were only in the US), the movie is flagged as a US action 
+movie.
+For Super Hero movies, if the worldwide gross is greater than the US gross,
+ the movie is flagged as a global action movie.
+For all other movies, we leave the flag blank
+
+```{python}
+movies
+```
+
+```{python}
+
+def flag_movie(movie_type, us_gross, ww_gross): 
+    if movie_type == "Super Hero" and us_gross == ww_gross: 
+        return "US action movie"
+    elif movie_type == "Super Hero" and us_gross < ww_gross: 
+        return "Global Action movie"
+    else: 
+        None
+
+
+flag_movie_vec  = np.vectorize(flag_movie)
+```
+
+
+```{python}
+#testing the function: 
+flag_movie(movie_type = "Super Hero", us_gross = 100, ww_gross = 100)
+flag_movie(movie_type = "Super Hero", us_gross = 100, ww_gross = 200)
+flag_movie(movie_type = "Comedy", us_gross = 100, ww_gross = 200)
+```
+
+
+```{python}
+#applying the vectorized ftn to the movie df: 
+movies["Action_Flag"] = flag_movie_vec(movie_type = movies["Creative_Type"], us_gross = movies["US_Gross"],
+ww_gross = movies["Worldwide_Gross"])
+
+movies["Action_Flag"].value_counts(dropna=False)
+```
+
+# Practice Q3 : Flag Movies Based on Ratings
+In the movies dataset, flag movies as Critic-friendly or Commercial based on their Rotten Tomatoes and IMDB ratings.
+
+If the Rotten Tomatoes rating is above 70% and the IMDB rating is below 5, the movie is flagged as Critic-friendly.
+If the Rotten Tomatoes rating is below 50% and the IMDB rating is above 7, the movie is flagged as Commercial.
+Otherwise, the movie is categorized as Other.
+Count how many movies are Critic-friendly and Commercial. There should be 13 Critic-friendly movies and 33 Commercial movies. Do you recognize any of them?
+
+
+```{python}
+def movie_rating( rt_score, imdb_score): 
+    if rt_score > 70 and imdb_score < 5: 
+        return "Critic-friendly"
+    elif rt_score < 50 and imdb_score > 7: 
+        return "Commercial"
+    else: 
+        return "Others"
+
+movie_rating_vec = np.vectorize(movie_rating)
+```
+
+
+```{python}
+#using the defined vectorized ftn on the movie df: 
+movies["Movie_rating"] = movie_rating_vec(movies["Rotten_Tomatoes_Rating"], movies["IMDB_Rating"])
+
+movies["Movie_rating"].value_counts(dropna=False)
+	
+```

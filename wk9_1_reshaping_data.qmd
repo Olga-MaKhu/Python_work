@@ -1,0 +1,275 @@
+---
+title : "Reshaping Data with melt() and pivot ()
+author: "Olga Mushakarara"
+format: 
+    html: 
+        embed-resources: true
+---
+# Learning objectives: 
+
+-  Understand what wide data format is and what long data format is.
+-  Learn how to reshape wide data to long data using melt().
+-  Learn how to reshape long data to wide data using pivot().
+
+```{python}
+import pandas as pd
+import plotly.express as px
+```
+
+# Importing Data 
+
+```{python}
+# Temperatures dataset
+temperatures = pd.DataFrame(
+    {
+        "country": ["Sweden", "Denmark", "Norway"],
+        "1994": [1, 2, 3],
+        "1995": [3, 4, 5],
+        "1996": [5, 6, 7],
+    }
+)
+
+# Fuels Wide dataset
+fuels_wide = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/oil_per_capita_wide.csv"
+)
+
+# Eurostat Births Wide dataset
+euro_births_wide = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/euro_births_wide.csv"
+)
+
+# Contracts dataset
+contracts = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/chicago_contracts_20_23.csv"
+)
+
+# Population dataset
+population = pd.read_csv(
+    "https://raw.githubusercontent.com/the-graph-courses/idap_book/main/data/tidyr_population.csv"
+)
+```
+
+
+```{python}
+# checking the imported datasets: 
+
+# Temperatures dataset is WIDE!!
+temperatures 
+
+
+```
+
+```{python}
+ # Fuels Wide dataset is WIDE 
+fuels_wide 
+
+```
+
+
+```{python}
+
+# Eurostat Births Wide dataset is WIDE!!
+euro_births_wide 
+```
+
+
+```{python}
+# Contracts dataset is LONG!!
+contracts 
+```
+
+
+```{python}
+# Population dataset is LONG!!
+population 
+
+```
+
+## When to use the WIDE vs LONG data 
+
+Wide: Displaying information 
+Long: Analysis or Plotting 
+
+## From WIDE to LONG with `melt()`
+
+
+```{python}
+fuels_wide
+```
+
+```{python}
+# changing to a long format using the melt() method: 
+
+fuels_wide.melt(id_vars = (["Entity", "Code"])).sort_values(["Entity", "variable"])
+```
+
+
+```{python}
+# Adding indivative variable names for the melted df:
+fuels_long = fuels_wide.melt(
+    id_vars=(["Entity", "Code"]),
+    var_name = "year",
+    value_name = "oil_consumption").sort_values(["Entity", "year"])
+
+fuels_long
+```
+
+
+```{python}
+#removing the y_ from the year variable and making it an integer: 
+fuels_long["year"] = fuels_long["year"].str.replace("y_", "").astype(int)
+
+fuels_long
+```
+# Practice Q1: Temperatures to Long
+Convert the temperatures dataset shown below into a long format. Your answer should have the following column names: “country”, “year”, and “avg_temp”.
+
+
+
+```{python}
+temperatures
+```
+
+
+```{python}
+# changing the temperature df from wide to long: 
+temperatures_long = temperatures.melt(
+    id_vars = (["country"]),
+    var_name = "year", 
+    value_name = "avg_temp"
+)
+
+temperatures_long
+```
+
+# Practice Q2 : Eurostat Births to Long
+For this practice question, you will use the euro_births_wide dataset from Eurostat. It shows the annual number of births in 50 European countries:
+
+The data is in a wide format. Convert it to a long format DataFrame that has the following column names: “country”, “year”, and “births_count”.
+
+Remove the x prefix from the year columns and convert them to integers.
+
+
+```{python}
+euro_births_wide.head()
+```
+
+
+```{python}
+# converting the wide df to long: 
+euro_births_long = euro_births_wide.melt(
+    id_vars = (["country"]), 
+    var_name = "year", 
+    value_name = "births_count"
+)
+euro_births_long
+```
+
+
+```{python}
+# removing the x prefix from the year and also converting it to years: 
+
+euro_births_long["year"] = euro_births_long["year"].str.replace("x", "").astype(int)
+
+euro_births_long
+```
+
+## Using Long Data for Analysis
+
+
+```{python}
+fuels_wide
+```
+
+
+```{python}
+fuels_long
+```
+
+
+```{python}
+# Calculating the average oil consumption per country: 
+
+fuels_long.groupby("Entity")["oil_consumption"].mean()
+```
+
+# Plotting using the LONG format: 
+
+
+```{python}
+# 1st create a subset df using 3 countries: 
+
+subset_fuel = fuels_long.query("Entity.isin(['Peru','China','Iran'])")
+
+subset_fuel
+```
+
+
+```{python}
+# plotting the subset fuel consumption: 
+
+px.line(
+    subset_fuel, 
+    x = "year", 
+    y = "oil_consumption", 
+    color = "Entity"
+)
+```
+
+## From LONG to WIDE. 
+
+
+```{python}
+
+# creating a long format df pf number of contracts per state per year: 
+contracts_summary = contracts.groupby("state")["year"].value_counts().reset_index()
+
+contracts_summary
+```
+
+
+```{python}
+# creating a wide formatted df from the contract summary where each country is in its own row: 
+
+contracts_summary.pivot(
+    columns = "year", 
+    index = "state", 
+    values = "count"
+).reset_index()
+
+```
+
+
+```{python}
+# creating a wide formatted df from the contract summary where each year is in its own row and the states are the column names:
+
+contracts_summary.pivot(columns="state", index="year", values="count").reset_index()
+```
+# Practice Q3: Temperatures back to Wide
+Convert the long temperatures_long dataset you created above back to a wide format. Your answer should have the following column names: “country”, “1994”, “1995”, and “1996”.
+
+```{python}
+# Converting the temperatures_long df to a wide format: 
+temperatures_long.pivot(
+    index = "country", 
+    columns = "year", 
+    values = "avg_temp"
+).reset_index()
+```
+
+# Practice Q4: Population to Wide
+The population dataset shows the populations of 219 countries over time.
+
+Reshape this data into a wide format.
+
+```{python}
+# Changing the population df from long to wide: 
+
+population.pivot(
+    index  = "country", 
+    columns = "year", 
+    values = "population"
+).reset_index()
+```
+

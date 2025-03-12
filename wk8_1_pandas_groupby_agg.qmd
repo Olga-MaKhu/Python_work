@@ -1,0 +1,239 @@
+---
+Title: "Pandas Groupby Agg"
+Author: "Olga"
+format: 
+    html: 
+        embed-resources: true
+---
+
+Imports 
+
+```{python}
+import pandas as pd
+import numpy as np
+```
+
+## Data 
+
+
+```{python}
+yao = pd.read_csv("Data/yaounde_mini.csv")
+
+yao
+```
+
+## Introducing the agg()
+
+
+```{python}
+#classic script 
+yao["age"].mean()
+```
+
+```{python}
+# using the agg: 
+yao.agg(mean_age = ("age", "mean")) # using a truple()
+```
+
+# Pro: agg() can call multiple summary ftns/stats at the same time. 
+
+
+```{python}
+yao_summary = yao.agg(mean_age = ("age", "mean"), 
+median_age = ("age", "median"))
+
+yao_summary
+```
+
+# Practice Q1: Mean and median weight
+Use agg() and the relevant summary functions to obtain the mean and median of respondent weights from the weight_kg variable of the yao data frame.
+
+
+```{python}
+yao.agg(mean_weight = ("weight_kg","mean"), 
+median_weight = ("weight_kg", "median"))
+```
+
+# Introducing groupby
+
+
+```{python}
+yao.groupby("sex")
+```
+
+
+```{python}
+yao.groupby("sex").agg(mean_age = ("age", "mean"),median_age = ("age", "median"))
+
+# this will give u a multiple index role which we do not want to use. 
+```
+
+
+```{python}
+# to get rid of the hierarchical index column and get one index header: 
+yao.groupby("sex").agg(mean_age = ("age", "mean"),median_age = ("age", "median")).reset_index()
+```
+
+# formating the script to have each section start on a new line. 
+
+```{python}
+(
+    yao.groupby("sex")
+    .agg(mean_age = ("age", "mean"),median_age = ("age", "median"))
+    .reset_index()
+)
+```
+
+# getting the Max, min weights and number of individuals per neighbourhood 
+
+
+```{python}
+(
+    yao.groupby("neighborhood")
+    .agg(
+        max_weight=("weight_kg", "max"),
+        min_weight=("weight_kg", "min"),
+        num_inds=("weight_kg", "size"),
+    )
+    .reset_index()
+)
+```
+
+# Practice Q: Min and max height per sex
+Use groupby(), agg(), and the relevant summary functions to obtain the minimum and maximum heights for each sex in the yao data frame, as well as the number of individuals in each sex group.
+
+
+```{python}
+(
+    yao.groupby("sex")
+    .agg(
+        min_height_cm=("height_cm", "min"),
+        max_height_cm=("height_cm", "max"),
+        count=("height_cm", "size"),
+    )
+    .reset_index()
+)
+```
+
+## Nested groupings 
+Using multiple variables in the use by ftn: 
+
+```{python}
+(
+    yao.groupby(["sex","neighborhood"])
+    .agg(
+        max_weight=("weight_kg", "max"),
+        min_weight=("weight_kg", "min"),
+        num_inds=("weight_kg", "size"),
+    )
+    .reset_index()
+)
+```
+
+
+# Practice Q3: Min and max height per age sex group
+Use groupby(), agg(), and min() and max() to get the minimum and maximum heights for each age-sex group in the yao data frame. The variables needed are age_category_3 and sex.
+
+
+```{python}
+(
+    yao.groupby(["age_category_3","sex"])
+    .agg(
+        min_height_cm=("height_cm", "min"),
+        max_height_cm=("height_cm", "max")
+    )
+    .reset_index()
+)
+```
+
+# NaN values in agg: 
+How agg() handles missing values 
+
+```{python}
+# using the "is smoker" variable: 
+(
+    yao.groupby("is_smoker")
+    .agg(weight_mean = ("weight_kg", "mean"))
+
+)
+# is script will drop other missing values 
+```
+
+
+```{python}
+(
+    yao.groupby("is_smoker", dropna = False)
+    .agg(weight_mean = ("weight_kg", "mean"),
+    count = ("weight_kg", "size"))
+)
+
+# this retains the NaN in the "is_smoker" variable 
+```
+
+# Practice Q4: Mean weight by pregnancy status
+Use groupby(), agg(), and the mean() function to obtain the mean weight (kg) by pregnancy status in the yao data frame. Include individuals with NaN pregnancy status in the summary table.
+
+
+```{python}
+(
+    yao.groupby("is_pregnant", dropna=False)
+    .agg(weight_mean=("weight_kg", "mean"))
+    .reset_index()
+)
+```
+
+# Custom stats with lambda functions 
+(anonymous function - ftn without a name)
+
+
+```{python}
+def range_func(x):
+    return max(x) - min(x)
+
+range_func([1,5,6])
+```
+
+Using lambda: 
+
+
+```{python}
+range_func = lambda x : max(x) - min(x)
+
+range_func([1,5,6])
+```
+
+## calculating the range of weights per neighborhood. 
+
+```{python}
+(
+    yao.groupby("neighborhood")
+    .agg(weight_range = ("weight_kg", lambda x: max(x) - min(x)))
+)
+```
+
+Calcultaing the coefficient of variation: (std/mean) * 100
+
+
+```{python}
+(
+    yao.groupby("neighborhood")
+    .agg(weight_range = ("weight_kg", lambda x: (x.std()/x.mean()) * 100))
+)
+```
+
+
+# Practice Q5: IQR of age by neighborhood
+Find the interquartile range (IQR) of the age variable for each neighborhood. The IQR is the difference between the 75th and 25th percentiles. Your lambda will look like this: lambda x: x.quantile(0.75) - x.quantile(0.25)
+
+```{python}
+(
+    yao.groupby("neighborhood").agg(
+        age_iqr=("age", lambda x: x.quantile(0.75) - x.quantile(0.25))
+    )
+)
+```
+
+
+
+
+

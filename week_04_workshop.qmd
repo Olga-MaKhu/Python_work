@@ -1,0 +1,67 @@
+---
+title: "India TB Pathway Analysis"
+format: 
+    html: 
+        embed-resources: true
+author: "Olga Mushakarara"
+execute: 
+  echo: false
+---
+
+# India TB Pathway Data Analysis Report 
+
+The India TB Pathways dataset is based on a study conducted in Vellore district, Tamil Nadu, India. It
+examines the pre-diagnostic costs and health-seeking behavior of 880 new adult pulmonary tuberculosis
+patients registered at Primary Health Centres (PHCs).
+
+```{python}
+# importing the necessary packages 
+import pandas as pd 
+import plotly.express as px 
+from itables import show
+```
+
+
+```{python}
+india_tb_df = pd.read_csv("/Users/olga/Desktop/Week_4/2.graph_course_python/Data/india_tb_pathways_and_costs.csv")
+
+show(india_tb_df)
+```
+
+![Map of Tamil Nadu. Vellore district is in the north-east](Images_1/tndistrict_1.png)
+
+## Analysis of chest X-ray results against smoking habits.
+
+
+```{python}
+# using a bivariate histogram to show the relationship between chest xray results and smoking habits of the patients.
+
+tb_plot = px.histogram(india_tb_df, 
+            x = "Smoking",
+            color = "Chext Xray",
+            barnorm = "percent",
+            text_auto = ".0f", 
+            title = " Distribution of the chest x-ray results disaggregated by smoking status.")
+
+tb_plot.show()
+```
+
+Based on the above plot, a higher proportion of clients that are smokers (83%) tested positive of TB on their chest xray compared to the non smokers (76%) which indicates. 
+
+
+## Pre-diagnostic costs 
+
+
+```{python}
+#| echo: false
+# Getting the cost of the first visit 
+
+highest_first_visit_cost = int(india_tb_df["first visit cost"].max())
+
+
+
+```
+
+The amount of the highest cost of the first visit was **`{python} highest_first_visit_cost`**
+
+

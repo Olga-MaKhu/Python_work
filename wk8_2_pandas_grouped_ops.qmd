@@ -1,0 +1,204 @@
+---
+title: "Other grouped operations in Pandas"
+author: "Olga"
+format: 
+    html: 
+        embed-resources: false
+---
+
+# Imports 
+
+```{python}
+import pandas as pd
+import vega_datasets as vd
+import plotly.express as px
+import warnings
+import calendar
+
+pd.options.mode.copy_on_write = True
+
+warnings.filterwarnings("ignore")
+```
+
+## Data 
+
+```{python}
+weather_raw = vd.data.seattle_weather()
+
+weather = weather_raw.query('date.dt.year == 2012')
+
+# creating a new variable called month: 
+
+weather["month"] = pd.Categorical(
+    weather["date"].dt.strftime("%B"),
+    categories = list(calendar.month_name[1:]), 
+    ordered=True
+)
+
+weather
+```
+
+# Adding summarry statistics with transform()
+
+
+```{python}
+# Getting the average precipitation for each month 
+(
+    weather.groupby("month")
+    .agg(mean_precip = ("precipitation", "mean"))
+)
+
+#this method does not allow a user to assign  the output of this to a new variable to be appended in the df. 
+
+```
+
+
+```{python}
+#using transform() to create a new variable MEAN:
+
+weather["mean_precip_month"] = weather.groupby("month")["precipitation"].transform("mean")
+
+
+```
+
+
+```{python}
+#using transform() to create a new variable Median: 
+weather["median_precip_month"] = weather.groupby("month")["precipitation"].transform("median")
+
+```
+
+
+```{python}
+#using transform() to create a new variable SUM
+
+weather["sum_precip_month"] = weather.groupby("month")["precipitation"].transform("sum")
+
+weather
+```
+
+```{python}
+#using transform() to create a new variable calculating the % of precipitation 
+
+weather["precip_month_perc"] = 100 *(weather["precipitation"]/weather["sum_precip_month"])
+weather
+
+```
+
+# Practice Q1: Daily Tip Proportions
+Using the tips dataset, calculate: 1. A new column daily_total_tips containing the total tips for each day 2. A new column tip_proportion showing what proportion of that day’s total tips came from each customer
+
+
+```{python}
+
+tips = px.data.tips()
+
+tips
+```
+
+
+```{python}
+
+# getting the daily total tip: 
+tips["daily_total_tips"] = tips.groupby("day")["tip"].transform("sum")
+
+tips
+```
+
+
+```{python}
+# Calculating the proportion of each tip on the daily total tip:
+
+tips["tip_proportion"] = 100 * (tips["tip"] / tips["daily_total_tips"])
+
+tips
+```
+
+
+```{python}
+weather = weather[["date","month","precipitation","wind","weather"]]
+
+weather
+```
+
+## Counting Values within Groups using the value_counts()
+
+
+```{python}
+weather["weather"].value_counts(normalize = True)
+```
+
+# Grouped version i.e wanting to know the proportions of the type of weathers in each month.  
+
+
+```{python}
+weather.groupby("month")["weather"].value_counts()
+```
+
+
+```{python}
+weather.groupby("month")["weather"].value_counts(normalize=True).reset_index()
+
+
+```
+
+# Practice Q2: Count Smokers and Non-Smokers by Day
+Using the tips dataset, count the number of smokers and non-smokers for each day.
+
+
+
+```{python}
+tips = px.data.tips()
+tips
+```
+
+
+```{python}
+# counting the number of smokers on each day:
+
+tips.groupby("day")["smoker"].value_counts()
+```
+
+# Cumulative sums: 
+
+```{python}
+#calculating the cumulative rain per month on the weather dataset: 
+
+weather["precipitation"].cumsum()
+
+# this method will add the value of the bottom entry to give the cumulative sum(like in excel).
+# to get per month: 
+weather["percip_cumul"] = weather.groupby("month")["precipitation"].cumsum()
+
+weather
+
+# this code will ensure that the summation re-initiates at the beginning of a new month. 
+```
+
+# Practice Q3: Cumulative Tip Amount by Day
+
+Using the tips dataset, compute the cumulative sum of total_bill for each day, adding a new column cumul_total_bill_day. Then add another column cumul_tip_day that contains the cumulative sum of tip for each day.
+
+```{python}
+tips = px.data.tips()
+
+tips = tips.sort_values("day")
+
+tips
+```
+```{python}
+
+# for total bills 
+tips["cumul_total_bill_day"] = tips.groupby("day")["total_bill"].cumsum()
+
+tips
+```
+
+
+```{python}
+
+# For total tips
+tips["cumul_tips_day"] = tips.groupby("day")["tip"].cumsum()
+
+tips
+```
