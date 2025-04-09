@@ -1,0 +1,184 @@
+---
+title: "Gapminder 2007"
+format: dashboard
+theme: superhero
+---
+
+
+
+```{python}
+import plotly.express as px 
+
+p = px.line(y = [1,2,3])
+
+```
+
+
+# Page 1 Code Along
+
+## Row 1 {height="30%"}
+
+### Column 1 {width="20%"}
+
+```{python}
+p 
+```
+
+### Column 2 {width="80%"}
+
+```{python}
+p 
+```
+
+## Row 2 {height = "70%"}
+
+```{python}
+p 
+```
+
+
+# Page 2 Practice Question
+
+## Row 1 {height="30%"}
+
+### column 1 {width="40%"}
+
+```{python}
+p
+```
+
+### column 2 {width="30%"}
+
+```{python}
+p
+```
+
+### column 3 {width="30%"}
+
+```{python}
+p
+```
+
+## Row 2 {height="70%"}
+
+### column 1 {width="60%"}
+
+```{python}
+p
+```
+
+### column 2 {width="40%"}
+
+```{python}
+p
+```
+
+# Tabsets 
+
+## Row 1 {height="30%"}
+
+### Column 1 {.tabset width="20%"}
+
+#### Tab 1
+
+```{python}
+p 
+```
+
+#### Tab 2 
+
+Hello World!!
+
+
+### Column 2 {width="80%"}
+
+```{python}
+p 
+```
+
+## Row 2 {.tabset height = "70%"}
+
+### Tab 1 
+
+```{python}
+p 
+```
+
+### Tab 2 
+
+Hello World 
+
+# Practice 2 
+
+## Row 1 {height="30%"}
+
+### column 1
+
+```{python}
+p 
+```
+
+### column 2 
+
+```{python}
+p 
+```
+
+## Row 2 {height="70%"}
+
+### column 1 {width="80%"}
+
+```{python}
+p 
+```
+
+
+### column 2 {.tabset width="20%"}
+
+#### Tab 1 
+
+```{python}
+p 
+```
+
+#### Tab 2
+
+```{python}
+p 
+```
+
+# Value Boxes 
+
+```{python}
+# getting the number of rows and columns 
+
+tips = px.data.tips()
+num_cols = tips.shape[1]
+
+num_rows = tips.shape[0]
+
+```
+
+## {height="20%"}
+
+::: {.valuebox title = "Number of colums" color="primary" icon="heart"}
+`{python} num_cols`
+
+Few Columns
+:::
+
+::: {.valuebox title = "Number of rows" color="danger" icon="arrow-up"}
+`{python} num_rows`
+
+Many Rows 
+:::
+
+::: {.valuebox title = "Medium Number" color="#5ba3b6" icon="bar-chart"}
+1
+:::
+
+##
+
+```{python}
+p 
+```
